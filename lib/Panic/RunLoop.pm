@@ -27,6 +27,7 @@ has dispatch => (
         for my $consumer ( map $_->new,
             Module::Find::useall('Panic::Consumer') )
         {
+            $consumer->setup;
             for my $type ( $consumer->event_types ) {
                 push @{ $dispatch{"Panic::Event::$type"} }, $consumer;
             }
@@ -59,6 +60,10 @@ sub run {
         # are we done?
         last if $self->has_max_events && $processed >= $self->max_events;
     }
+
+    $_->teardown for map @$_, values %$dispatch;
+
+    #$_->generate for $self->generators;
 }
 
 1;
