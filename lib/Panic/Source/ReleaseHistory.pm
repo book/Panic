@@ -6,13 +6,19 @@ use Panic::Event::NewRelease;
 use CPAN::ReleaseHistory;
 use File::Spec;
 
+# ugly hack
+no warnings 'redefine';
+*CPAN::ReleaseHistory::by_dist_then_date = sub {
+    return $CPAN::ReleaseHistory::a->[2] <=> $CPAN::ReleaseHistory::b->[2];
+};
+
 has release_iterator => (
     is      => 'ro',
     default => sub {
         CPAN::ReleaseHistory->new(
             path => File::Spec->catfile(
                 File::HomeDir->my_dist_data('CPAN-ReleaseHistory'),
-                'release-history.txt'
+                'release-history-by-date.txt'
             ),
         )->release_iterator( well_formed => 1 );
     },
